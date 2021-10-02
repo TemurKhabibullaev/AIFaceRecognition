@@ -1,7 +1,7 @@
 import os
 import sys
 import cv2
-import utils
+import tools
 from keras.models import load_model
 import faceDetection
 import collections
@@ -22,7 +22,7 @@ if 'true_img.png' not in files:
     sys.exit()    
 
 # load pre-trained Siamese neural network
-model = load_model('siamese_nn.h5', custom_objects={'contrastive_loss': utils.contrastive_loss, 'euclidean_distance': utils.euclidean_distance})
+model = load_model('siamese_nn.h5', custom_objects={'contrastive_loss': tools.contrastive_loss, 'euclidean_distance': tools.euclidean_distance})
 
 # prepare the true image obtained during onboard
 true_img = cv2.imread('true_img.png', 0)
@@ -56,7 +56,7 @@ while True:
         else:
             text = "Identity Unknown!"
             cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 0, 255), 5)
-        frame = utils.write_on_frame(frame, text, face_coords[0], face_coords[1]-10)
+        frame = tools.write_on_frame(frame, text, face_coords[0], face_coords[1]-10)
 
     else:
         preds = collections.deque(maxlen=15) # clear existing predictions if no face detected 

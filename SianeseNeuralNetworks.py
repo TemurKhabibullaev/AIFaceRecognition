@@ -1,7 +1,7 @@
 '''
 Main code for training a Siamese neural network for face recognition
 '''
-import utils
+import tools
 import numpy as np
 from keras.layers import Input, Lambda
 from keras.models import Model
@@ -9,17 +9,17 @@ from keras.models import Model
 faces_dir = 'att_faces/'
 
 # Import Training and Testing Data
-(X_train, Y_train), (X_test, Y_test) = utils.get_data(faces_dir)
+(X_train, Y_train), (X_test, Y_test) = tools.get_data(faces_dir)
 num_classes = len(np.unique(Y_train))
 
 # Create Siamese Neural Network
 input_shape = X_train.shape[1:]
-shared_network = utils.create_shared_network(input_shape)
+shared_network = tools.create_shared_network(input_shape)
 input_top = Input(shape=input_shape)
 input_bottom = Input(shape=input_shape)
 output_top = shared_network(input_top)
 output_bottom = shared_network(input_bottom)
-distance = Lambda(utils.euclidean_distance, output_shape=(1,))([output_top, output_bottom])
+distance = Lambda(tools.euclidean_distance, output_shape=(1,))([output_top, output_bottom])
 model = Model(inputs=[input_top, input_bottom], outputs=distance)
 
 # Train the model
