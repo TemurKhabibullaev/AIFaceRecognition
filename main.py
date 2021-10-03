@@ -5,6 +5,7 @@ import tools
 from keras.models import load_model
 import faceDetection
 import collections
+import tensorflow
 
 name = input("What is your name?")
 
@@ -18,7 +19,7 @@ if 'siamese_nn.h5' not in files:
 # validate that the user has ran the onboarding process
 if 'true_img.png' not in files:
     print("Error: True image not found!")
-    print("Please run onbarding.py first")
+    print("Please run onboarding.py first")
     sys.exit()    
 
 # load pre-trained Siamese neural network
