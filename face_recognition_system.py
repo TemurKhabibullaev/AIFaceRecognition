@@ -1,5 +1,3 @@
-name = input("What is your name?")
-
 import os
 import sys
 import cv2
@@ -8,6 +6,7 @@ from keras.models import load_model
 import face_detection
 import collections
 
+name = input("What is your name?")
 # validate that the user has ran the model training process
 files = os.listdir()
 if 'siamese_nn.h5' not in files:
@@ -22,7 +21,7 @@ if 'true_img.png' not in files:
     sys.exit()    
 
 # load pre-trained Siamese neural network
-model = load_model('siamese_nn.h5', custom_objects={'contrastive_loss': utils.contrastive_loss, 'euclidean_distance': utils.euclidean_distance})
+model = load_model('siamese_nn.h5', custom_objects={'contrastive_loss': utils.contrastiveLoss, 'euclidean_distance': utils.euclideanDistance})
 
 # prepare the true image obtained during onboard
 true_img = cv2.imread('true_img.png', 0)
@@ -38,7 +37,7 @@ while True:
     _, frame = video_capture.read()
 
     # Detect Faces
-    frame, face_img, face_coords = face_detection.detect_faces(frame, draw_box=False)
+    frame, face_img, face_coords = face_detection.detect_faces(frame, drawBox=False)
 
     if face_img is not None:
         face_img = cv2.cvtColor(face_img, cv2.COLOR_BGR2GRAY)

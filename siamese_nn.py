@@ -1,6 +1,3 @@
-'''
-Main code for training a Siamese neural network for face recognition
-'''
 import utils
 import numpy as np
 from keras.layers import Input, Lambda
@@ -14,17 +11,17 @@ num_classes = len(np.unique(Y_train))
 
 # Create Siamese Neural Network
 input_shape = X_train.shape[1:]
-shared_network = utils.create_shared_network(input_shape)
+shared_network = utils.sharedNetwork(input_shape)
 input_top = Input(shape=input_shape)
 input_bottom = Input(shape=input_shape)
 output_top = shared_network(input_top)
 output_bottom = shared_network(input_bottom)
-distance = Lambda(utils.euclidean_distance, output_shape=(1,))([output_top, output_bottom])
+distance = Lambda(utils.euclideanDistance, output_shape=(1,))([output_top, output_bottom])
 model = Model(inputs=[input_top, input_bottom], outputs=distance)
 
 # Train the model
-training_pairs, training_labels = utils.create_pairs(X_train, Y_train, num_classes=num_classes)
-model.compile(loss=utils.contrastive_loss, optimizer='adam', metrics=[utils.accuracy])
+training_pairs, training_labels = utils.createdPairs(X_train, Y_train, numClasses=num_classes)
+model.compile(loss=utils.contrastiveLoss, optimizer='adam', metrics=[utils.accuracy])
 model.fit([training_pairs[:, 0], training_pairs[:, 1]], training_labels,
           batch_size=128,
           epochs=10)
