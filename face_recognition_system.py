@@ -1,7 +1,7 @@
 import os
 import sys
 import cv2
-import utils
+import functionsNN
 from keras.models import load_model
 import face_detection
 import collections
@@ -21,31 +21,31 @@ if 'true_img.png' not in files:
     sys.exit()    
 
 # load pre-trained Siamese neural network
-model = load_model('siamese_nn.h5', custom_objects={'contrastive_loss': utils.contrastiveLoss, 'euclidean_distance': utils.euclideanDistance})
+model = load_model('siameseModel.h5', custom_objects={'contrastive_loss': functionsNN.contrastiveLoss, 'euclidean_distance': functionsNN.euclideanDistance})
 
 # prepare the true image obtained during onboard
-true_img = cv2.imread('true_img.png', 0)
-true_img = true_img.astype('float32')/255
-true_img = cv2.resize(true_img, (92, 112))
-true_img = true_img.reshape(1, true_img.shape[0], true_img.shape[1], 1)
+trueImg = cv2.imread('true_img.png', 0)
+trueImg = trueImg.astype('float32') / 255
+trueImg = cv2.resize(trueImg, (92, 112))
+trueImg = trueImg.reshape(1, trueImg.shape[0], trueImg.shape[1], 1)
 
-video_capture = cv2.VideoCapture(0)
+videoCapture = cv2.VideoCapture(0)
 preds = collections.deque(maxlen=15)
 
 while True:
     # Capture frame-by-frame
-    _, frame = video_capture.read()
+    _, frame = videoCapture.read()
 
     # Detect Faces
-    frame, face_img, face_coords = face_detection.detect_faces(frame, drawBox=False)
+    frame, face_img, faceCoords = face_detection.detect_faces(frame, drawBox=False)
 
     if face_img is not None:
         face_img = cv2.cvtColor(face_img, cv2.COLOR_BGR2GRAY)
         face_img = face_img.astype('float32')/255
         face_img = cv2.resize(face_img, (92, 112))
         face_img = face_img.reshape(1, face_img.shape[0], face_img.shape[1], 1)
-        preds.append(1-model.predict([true_img, face_img])[0][0])
-        x,y,w,h = face_coords
+        preds.append(1 - model.predict([trueImg, face_img])[0][0])
+        x,y,w,h = faceCoords
         if len(preds) == 15 and sum(preds)/15 >= 0.3:
             text = "Identity: {}".format(name)
             cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 5)
@@ -55,7 +55,7 @@ while True:
         else:
             text = "Identity Unknown!"
             cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 0, 255), 5)
-        frame = utils.write_on_frame(frame, text, face_coords[0], face_coords[1]-10)
+        frame = functionsNN.write_on_frame(frame, text, faceCoords[0], faceCoords[1] - 10)
 
     else:
         preds = collections.deque(maxlen=15) # clear existing predictions if no face detected 
@@ -67,5 +67,5 @@ while True:
         break
 
 # When everything is done, release the capture
-video_capture.release()
+videoCapture.release()
 cv2.destroyAllWindows()

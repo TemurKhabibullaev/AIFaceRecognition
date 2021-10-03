@@ -1,30 +1,24 @@
-import utils
-import numpy as np
 from keras.layers import Input, Lambda
 from keras.models import Model
+import numpy as np
+import functionsNN
 
-faces_dir = 'att_faces/'
 
-# Import Training and Testing Data
-(X_train, Y_train), (X_test, Y_test) = utils.get_data(faces_dir)
-num_classes = len(np.unique(Y_train))
+# Creating Seamese Neural Networks & Importing Training and Testing Results
+faces_dir = 'facesDatabase/'
+(XTrain, YTrain), (XTest, YTest) = functionsNN.get_data(faces_dir)
+numClasses = len(np.unique(YTrain))
+inputShape = XTrain.shape[1:]
+inputTop = Input(shape=inputShape)
+inputBottom = Input(shape=inputShape)
+sharedNetwork = functionsNN.sharedNetwork(inputShape)
+outputTop = sharedNetwork(inputTop)
+outputBottom = sharedNetwork(inputBottom)
+distance = Lambda(functionsNN.euclideanDistance, output_shape=(1,))([outputTop, outputBottom])
+model = Model(inputs=[inputTop, inputBottom], outputs=distance)
 
-# Create Siamese Neural Network
-input_shape = X_train.shape[1:]
-shared_network = utils.sharedNetwork(input_shape)
-input_top = Input(shape=input_shape)
-input_bottom = Input(shape=input_shape)
-output_top = shared_network(input_top)
-output_bottom = shared_network(input_bottom)
-distance = Lambda(utils.euclideanDistance, output_shape=(1,))([output_top, output_bottom])
-model = Model(inputs=[input_top, input_bottom], outputs=distance)
-
-# Train the model
-training_pairs, training_labels = utils.createdPairs(X_train, Y_train, numClasses=num_classes)
-model.compile(loss=utils.contrastiveLoss, optimizer='adam', metrics=[utils.accuracy])
-model.fit([training_pairs[:, 0], training_pairs[:, 1]], training_labels,
-          batch_size=128,
-          epochs=10)
-
-# Save the model
-model.save('siamese_nn.h5')
+# Training:
+trainingPairs, trainingLabels = functionsNN.createdPairs(XTrain, YTrain, numClasses=numClasses)
+model.compile(loss=functionsNN.contrastiveLoss, optimizer='adam', metrics=[functionsNN.accuracy])
+model.fit([trainingPairs[:, 0], trainingPairs[:, 1]], trainingLabels, batch_size=128, epochs=10)
+model.save('siameseModel.h5')
